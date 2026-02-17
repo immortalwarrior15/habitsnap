@@ -8,9 +8,18 @@ class AudioPlayerService {
   final AudioPlayer _player = AudioPlayer();
   bool _prepared = false;
 
-  Future<void> setLoopAsset(String assetPath) async {
+  Future<void> setLoopSource({
+    required String assetPath,
+    required String streamUrl,
+  }) async {
     await _player.setLoopMode(LoopMode.one);
-    await _player.setAudioSource(AudioSource.asset(assetPath));
+    try {
+      // Пробуем потоковый звук из интернета.
+      await _player.setAudioSource(AudioSource.uri(Uri.parse(streamUrl)));
+    } catch (_) {
+      // Если сеть недоступна/URL недействителен — используем локальный asset.
+      await _player.setAudioSource(AudioSource.asset(assetPath));
+    }
     _prepared = true;
   }
 

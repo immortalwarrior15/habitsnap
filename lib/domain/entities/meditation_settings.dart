@@ -1,13 +1,34 @@
 enum MeditationSound {
-  rain('Дождь', 'assets/audio/rain.mp3'),
-  forest('Лес', 'assets/audio/forest.mp3'),
-  ocean('Океан', 'assets/audio/ocean.mp3'),
-  whiteNoise('Белый шум', 'assets/audio/white_noise.mp3'),
-  music('Медитативная музыка', 'assets/audio/meditation_music.mp3');
+  rain(
+    'Дождь',
+    'assets/audio/rain.mp3',
+    'https://cdn.pixabay.com/audio/2022/03/15/audio_c8c8a73467.mp3',
+  ),
+  forest(
+    'Лес',
+    'assets/audio/forest.mp3',
+    'https://cdn.pixabay.com/audio/2022/08/04/audio_2dde668d05.mp3',
+  ),
+  ocean(
+    'Океан',
+    'assets/audio/ocean.mp3',
+    'https://cdn.pixabay.com/audio/2021/08/04/audio_c6ccf9ba2f.mp3',
+  ),
+  whiteNoise(
+    'Белый шум',
+    'assets/audio/white_noise.mp3',
+    'https://cdn.pixabay.com/audio/2024/04/17/audio_5605f65c04.mp3',
+  ),
+  music(
+    'Медитативная музыка',
+    'assets/audio/meditation_music.mp3',
+    'https://cdn.pixabay.com/audio/2022/05/16/audio_1e34e17f4f.mp3',
+  );
 
-  const MeditationSound(this.title, this.assetPath);
+  const MeditationSound(this.title, this.assetPath, this.streamUrl);
   final String title;
   final String assetPath;
+  final String streamUrl;
 }
 
 class MeditationSettings {

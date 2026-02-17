@@ -71,7 +71,10 @@ class MeditationController extends StateNotifier<MeditationSettings> {
   }
 
   Future<void> startMeditation() async {
-    await _audioService.setLoopAsset(state.sound.assetPath);
+    await _audioService.setLoopSource(
+      assetPath: state.sound.assetPath,
+      streamUrl: state.sound.streamUrl,
+    );
     await _audioService.play();
 
     state = state.copyWith(isPlaying: true);
