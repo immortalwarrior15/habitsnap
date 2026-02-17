@@ -6,6 +6,7 @@ import '../data/repositories/settings_repository_impl.dart';
 import '../domain/entities/meditation_settings.dart';
 import '../domain/repositories/settings_repository.dart';
 import '../services/audio_player_service.dart';
+import '../services/heart_rate_service.dart';
 
 final settingsRepositoryProvider = Provider<SettingsRepository>((ref) {
   return SettingsRepositoryImpl();
@@ -17,11 +18,16 @@ final audioPlayerServiceProvider = Provider<AudioPlayerService>((ref) {
   return service;
 });
 
+final heartRateServiceProvider = Provider<HeartRateService>((ref) {
+  return HeartRateService();
+});
+
 final meditationControllerProvider =
     StateNotifierProvider<MeditationController, MeditationSettings>((ref) {
       final controller = MeditationController(
         repository: ref.watch(settingsRepositoryProvider),
         audioService: ref.watch(audioPlayerServiceProvider),
+        heartRateService: ref.watch(heartRateServiceProvider),
       );
       unawaited(controller.init());
       return controller;
@@ -31,13 +37,17 @@ class MeditationController extends StateNotifier<MeditationSettings> {
   MeditationController({
     required SettingsRepository repository,
     required AudioPlayerService audioService,
+    required HeartRateService heartRateService,
   })  : _repository = repository,
         _audioService = audioService,
+        _heartRateService = heartRateService,
         super(MeditationSettings.initial());
 
   final SettingsRepository _repository;
   final AudioPlayerService _audioService;
+  final HeartRateService _heartRateService;
   Timer? _timer;
+  Timer? _heartRateTimer;
 
   Future<void> init() async {
     state = await _repository.load();
@@ -79,6 +89,7 @@ class MeditationController extends StateNotifier<MeditationSettings> {
     await _audioService.setVolume(state.volume);
 
     state = state.copyWith(isPlaying: true);
+    await _startHeartRateSyncIfEnabled();
 
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) async {
       if (state.remainingSeconds <= 1) {
@@ -91,6 +102,7 @@ class MeditationController extends StateNotifier<MeditationSettings> {
 
   Future<void> pauseMeditation() async {
     _cancelTimer();
+    _cancelHeartRateTimer();
     await _audioService.pause();
     state = state.copyWith(isPlaying: false);
   }
@@ -100,6 +112,7 @@ class MeditationController extends StateNotifier<MeditationSettings> {
     await _audioService.play();
     await _audioService.setVolume(state.volume);
     state = state.copyWith(isPlaying: true);
+    await _startHeartRateSyncIfEnabled();
 
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) async {
       if (state.remainingSeconds <= 1) {
@@ -112,6 +125,7 @@ class MeditationController extends StateNotifier<MeditationSettings> {
 
   Future<void> stopMeditation({bool playBell = false}) async {
     _cancelTimer();
+    _cancelHeartRateTimer();
 
     if (playBell) {
       await _audioService.playBellAndFadeOut();
@@ -168,6 +182,51 @@ class MeditationController extends StateNotifier<MeditationSettings> {
     await _repository.save(state);
   }
 
+  Future<void> toggleAdaptiveMode() async {
+    final enabled = !state.isAdaptiveModeEnabled;
+    state = state.copyWith(isAdaptiveModeEnabled: enabled);
+    await _repository.save(state);
+
+    if (!enabled) {
+      _cancelHeartRateTimer();
+      state = state.copyWith(
+        clearCurrentHeartRate: true,
+        breathingPaceLabel: '4-4',
+      );
+    } else if (state.isPlaying) {
+      await _startHeartRateSyncIfEnabled();
+    }
+  }
+
+  Future<void> _startHeartRateSyncIfEnabled() async {
+    if (!state.isAdaptiveModeEnabled) return;
+    _cancelHeartRateTimer();
+
+    final granted = await _heartRateService.requestAccess();
+    if (!granted) {
+      state = state.copyWith(
+        clearCurrentHeartRate: true,
+        breathingPaceLabel: '4-4',
+      );
+      return;
+    }
+
+    await _syncHeartRate();
+    _heartRateTimer = Timer.periodic(const Duration(seconds: 15), (_) async {
+      await _syncHeartRate();
+    });
+  }
+
+  Future<void> _syncHeartRate() async {
+    final bpm = await _heartRateService.fetchLatestHeartRate();
+    if (bpm == null) return;
+
+    state = state.copyWith(
+      currentHeartRate: bpm,
+      breathingPaceLabel: _heartRateService.breathingPaceForHeartRate(bpm),
+    );
+  }
+
   MeditationSettings _updateProgressAfterCompletedSession(
     MeditationSettings settings,
   ) {
@@ -198,9 +257,15 @@ class MeditationController extends StateNotifier<MeditationSettings> {
     _timer = null;
   }
 
+  void _cancelHeartRateTimer() {
+    _heartRateTimer?.cancel();
+    _heartRateTimer = null;
+  }
+
   @override
   void dispose() {
     _cancelTimer();
+    _cancelHeartRateTimer();
     super.dispose();
   }
 }

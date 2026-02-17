@@ -44,6 +44,9 @@ class MeditationSettings {
     required this.totalMeditationMinutes,
     required this.currentStreak,
     required this.lastCompletedDay,
+    required this.isAdaptiveModeEnabled,
+    required this.currentHeartRate,
+    required this.breathingPaceLabel,
   });
 
   final int durationMinutes;
@@ -59,6 +62,9 @@ class MeditationSettings {
   final int totalMeditationMinutes;
   final int currentStreak;
   final int? lastCompletedDay;
+  final bool isAdaptiveModeEnabled;
+  final int? currentHeartRate;
+  final String breathingPaceLabel;
 
   factory MeditationSettings.initial() {
     return const MeditationSettings(
@@ -73,6 +79,9 @@ class MeditationSettings {
       totalMeditationMinutes: 0,
       currentStreak: 0,
       lastCompletedDay: null,
+      isAdaptiveModeEnabled: true,
+      currentHeartRate: null,
+      breathingPaceLabel: '4-4',
     );
   }
 
@@ -88,6 +97,10 @@ class MeditationSettings {
     int? totalMeditationMinutes,
     int? currentStreak,
     int? lastCompletedDay,
+    bool? isAdaptiveModeEnabled,
+    int? currentHeartRate,
+    String? breathingPaceLabel,
+    bool clearCurrentHeartRate = false,
   }) {
     return MeditationSettings(
       durationMinutes: durationMinutes ?? this.durationMinutes,
@@ -103,6 +116,10 @@ class MeditationSettings {
           totalMeditationMinutes ?? this.totalMeditationMinutes,
       currentStreak: currentStreak ?? this.currentStreak,
       lastCompletedDay: lastCompletedDay ?? this.lastCompletedDay,
+      isAdaptiveModeEnabled: isAdaptiveModeEnabled ?? this.isAdaptiveModeEnabled,
+      currentHeartRate:
+          clearCurrentHeartRate ? null : (currentHeartRate ?? this.currentHeartRate),
+      breathingPaceLabel: breathingPaceLabel ?? this.breathingPaceLabel,
     );
   }
 }

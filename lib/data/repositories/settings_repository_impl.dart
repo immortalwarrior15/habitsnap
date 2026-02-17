@@ -13,6 +13,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
   static const _totalMinutesKey = 'total_minutes';
   static const _currentStreakKey = 'current_streak';
   static const _lastCompletedDayKey = 'last_completed_day';
+  static const _adaptiveModeKey = 'adaptive_mode_enabled';
 
   @override
   Future<MeditationSettings> load() async {
@@ -32,6 +33,9 @@ class SettingsRepositoryImpl implements SettingsRepository {
       totalMeditationMinutes: prefs.getInt(_totalMinutesKey) ?? 0,
       currentStreak: prefs.getInt(_currentStreakKey) ?? 0,
       lastCompletedDay: prefs.getInt(_lastCompletedDayKey),
+      isAdaptiveModeEnabled: prefs.getBool(_adaptiveModeKey) ?? true,
+      currentHeartRate: null,
+      breathingPaceLabel: '4-4',
     );
   }
 
@@ -46,6 +50,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
     await prefs.setInt(_totalSessionsKey, settings.totalSessions);
     await prefs.setInt(_totalMinutesKey, settings.totalMeditationMinutes);
     await prefs.setInt(_currentStreakKey, settings.currentStreak);
+    await prefs.setBool(_adaptiveModeKey, settings.isAdaptiveModeEnabled);
     if (settings.lastCompletedDay != null) {
       await prefs.setInt(_lastCompletedDayKey, settings.lastCompletedDay!);
     }

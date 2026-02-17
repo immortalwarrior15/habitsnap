@@ -66,6 +66,38 @@ class HomeScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 16),
+            Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Пульс и адаптивное дыхание',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Пульс: ${state.currentHeartRate?.toString() ?? '—'} BPM',
+                    ),
+                    Text('Ритм дыхания: ${state.breathingPaceLabel}'),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      value: state.isAdaptiveModeEnabled,
+                      title: const Text('Адаптировать под пульс (Apple Watch/Garmin/Wear OS)'),
+                      subtitle: const Text(
+                        'Требует доступ к Apple Health или Google Fit на устройстве.',
+                      ),
+                      onChanged: (_) => controller.toggleAdaptiveMode(),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
             Text('Смарт-пресеты', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             Wrap(
