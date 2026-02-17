@@ -254,6 +254,34 @@ class MeditationController extends StateNotifier<MeditationSettings> {
     await _repository.save(state);
   }
 
+  // Ручная проверка канала пульса для QA/диагностики.
+  Future<void> refreshHeartRateNow() async {
+    if (!state.isAdaptiveModeEnabled) {
+      state = state.copyWith(
+        clearCurrentHeartRate: true,
+        clearLastHeartRateSyncAt: true,
+      );
+      await _repository.save(state);
+      return;
+    }
+
+    final granted = await _heartRateService.requestAccess();
+    state = state.copyWith(isHeartRatePermissionGranted: granted);
+    await _repository.save(state);
+
+    if (!granted) {
+      state = state.copyWith(
+        clearCurrentHeartRate: true,
+        breathingPaceLabel: '4-4',
+        clearLastHeartRateSyncAt: true,
+      );
+      await _repository.save(state);
+      return;
+    }
+
+    await _syncHeartRate();
+  }
+
   MeditationSettings _updateProgressAfterCompletedSession(
     MeditationSettings settings,
   ) {

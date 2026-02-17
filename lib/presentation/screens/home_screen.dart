@@ -105,6 +105,14 @@ class HomeScreen extends ConsumerWidget {
                       ),
                       onChanged: (_) => controller.toggleAdaptiveMode(),
                     ),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: OutlinedButton.icon(
+                        icon: const Icon(Icons.favorite),
+                        label: const Text('Проверить пульс сейчас'),
+                        onPressed: controller.refreshHeartRateNow,
+                      ),
+                    ),
                   ],
                 ),
               ),
