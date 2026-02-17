@@ -47,6 +47,8 @@ class MeditationSettings {
     required this.isAdaptiveModeEnabled,
     required this.currentHeartRate,
     required this.breathingPaceLabel,
+    required this.isHeartRatePermissionGranted,
+    required this.lastHeartRateSyncAt,
   });
 
   final int durationMinutes;
@@ -65,6 +67,8 @@ class MeditationSettings {
   final bool isAdaptiveModeEnabled;
   final int? currentHeartRate;
   final String breathingPaceLabel;
+  final bool isHeartRatePermissionGranted;
+  final DateTime? lastHeartRateSyncAt;
 
   factory MeditationSettings.initial() {
     return const MeditationSettings(
@@ -82,6 +86,8 @@ class MeditationSettings {
       isAdaptiveModeEnabled: true,
       currentHeartRate: null,
       breathingPaceLabel: '4-4',
+      isHeartRatePermissionGranted: false,
+      lastHeartRateSyncAt: null,
     );
   }
 
@@ -101,6 +107,9 @@ class MeditationSettings {
     int? currentHeartRate,
     String? breathingPaceLabel,
     bool clearCurrentHeartRate = false,
+    bool? isHeartRatePermissionGranted,
+    DateTime? lastHeartRateSyncAt,
+    bool clearLastHeartRateSyncAt = false,
   }) {
     return MeditationSettings(
       durationMinutes: durationMinutes ?? this.durationMinutes,
@@ -120,6 +129,11 @@ class MeditationSettings {
       currentHeartRate:
           clearCurrentHeartRate ? null : (currentHeartRate ?? this.currentHeartRate),
       breathingPaceLabel: breathingPaceLabel ?? this.breathingPaceLabel,
+      isHeartRatePermissionGranted:
+          isHeartRatePermissionGranted ?? this.isHeartRatePermissionGranted,
+      lastHeartRateSyncAt: clearLastHeartRateSyncAt
+          ? null
+          : (lastHeartRateSyncAt ?? this.lastHeartRateSyncAt),
     );
   }
 }

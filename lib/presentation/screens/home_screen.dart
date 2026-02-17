@@ -20,6 +20,9 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(meditationControllerProvider);
     final controller = ref.read(meditationControllerProvider.notifier);
+    final lastSync = state.lastHeartRateSyncAt;
+    final isHeartRateFresh =
+        lastSync != null && DateTime.now().difference(lastSync).inSeconds <= 35;
 
     return Scaffold(
       appBar: AppBar(
@@ -84,6 +87,15 @@ class HomeScreen extends ConsumerWidget {
                       'Пульс: ${state.currentHeartRate?.toString() ?? '—'} BPM',
                     ),
                     Text('Ритм дыхания: ${state.breathingPaceLabel}'),
+                    const SizedBox(height: 4),
+                    Text(
+                      state.isHeartRatePermissionGranted
+                          ? (isHeartRateFresh
+                                ? 'Статус датчика: актуальные данные'
+                                : 'Статус датчика: данные устарели')
+                          : 'Статус датчика: доступ к пульсу не выдан',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
                       value: state.isAdaptiveModeEnabled,

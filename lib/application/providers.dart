@@ -210,6 +210,7 @@ class MeditationController extends StateNotifier<MeditationSettings> {
       state = state.copyWith(
         clearCurrentHeartRate: true,
         breathingPaceLabel: '4-4',
+        clearLastHeartRateSyncAt: true,
       );
       await _repository.save(state);
     } else if (state.isPlaying) {
@@ -222,11 +223,16 @@ class MeditationController extends StateNotifier<MeditationSettings> {
     _cancelHeartRateTimer();
 
     final granted = await _heartRateService.requestAccess();
+    state = state.copyWith(isHeartRatePermissionGranted: granted);
+    await _repository.save(state);
+
     if (!granted) {
       state = state.copyWith(
         clearCurrentHeartRate: true,
         breathingPaceLabel: '4-4',
+        clearLastHeartRateSyncAt: true,
       );
+      await _repository.save(state);
       return;
     }
 
@@ -243,6 +249,7 @@ class MeditationController extends StateNotifier<MeditationSettings> {
     state = state.copyWith(
       currentHeartRate: bpm,
       breathingPaceLabel: _heartRateService.breathingPaceForHeartRate(bpm),
+      lastHeartRateSyncAt: DateTime.now(),
     );
     await _repository.save(state);
   }
