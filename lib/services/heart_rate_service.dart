@@ -1,5 +1,14 @@
 import 'package:health/health.dart';
 
+int? _extractHeartRateValue(dynamic value) {
+  if (value is num) return value.round();
+
+  final match = RegExp(r'[-+]?\d*\.?\d+').firstMatch(value.toString());
+  if (match == null) return null;
+
+  return double.tryParse(match.group(0) ?? '')?.round();
+}
+
 class HeartRateService {
   final Health _health = Health();
 
@@ -28,9 +37,7 @@ class HeartRateService {
       if (points.isEmpty) return null;
 
       points.sort((a, b) => b.dateTo.compareTo(a.dateTo));
-      final value = points.first.value;
-      final parsed = int.tryParse(value.toString());
-      return parsed;
+      return _extractHeartRateValue(points.first.value);
     } catch (_) {
       return null;
     }

@@ -20,10 +20,14 @@ class SettingsRepositoryImpl implements SettingsRepository {
     final prefs = await SharedPreferences.getInstance();
     final duration = prefs.getInt(_durationKey) ?? 10;
     final soundIndex = prefs.getInt(_soundKey) ?? 0;
+    final safeSoundIndex =
+        (soundIndex < 0 || soundIndex >= MeditationSound.values.length)
+            ? 0
+            : soundIndex;
 
     return MeditationSettings(
       durationMinutes: duration,
-      sound: MeditationSound.values[soundIndex],
+      sound: MeditationSound.values[safeSoundIndex],
       isDarkTheme: prefs.getBool(_darkThemeKey) ?? true,
       isBreathingAnimationEnabled: prefs.getBool(_breathingKey) ?? true,
       isPlaying: false,
@@ -53,6 +57,8 @@ class SettingsRepositoryImpl implements SettingsRepository {
     await prefs.setBool(_adaptiveModeKey, settings.isAdaptiveModeEnabled);
     if (settings.lastCompletedDay != null) {
       await prefs.setInt(_lastCompletedDayKey, settings.lastCompletedDay!);
+    } else {
+      await prefs.remove(_lastCompletedDayKey);
     }
   }
 }

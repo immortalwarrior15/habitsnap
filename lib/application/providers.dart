@@ -54,6 +54,8 @@ class MeditationController extends StateNotifier<MeditationSettings> {
   }
 
   Future<void> setDuration(int minutes) async {
+    await _audioService.stop();
+    _cancelHeartRateTimer();
     state = state.copyWith(
       durationMinutes: minutes,
       remainingSeconds: minutes * 60,
@@ -65,6 +67,16 @@ class MeditationController extends StateNotifier<MeditationSettings> {
 
   Future<void> setSound(MeditationSound sound) async {
     state = state.copyWith(sound: sound);
+
+    if (state.isPlaying) {
+      await _audioService.setLoopSource(
+        assetPath: sound.assetPath,
+        streamUrl: sound.streamUrl,
+      );
+      await _audioService.play();
+      await _audioService.setVolume(state.volume);
+    }
+
     await _repository.save(state);
   }
 
@@ -81,6 +93,7 @@ class MeditationController extends StateNotifier<MeditationSettings> {
   }
 
   Future<void> startMeditation() async {
+    _cancelTimer();
     await _audioService.setLoopSource(
       assetPath: state.sound.assetPath,
       streamUrl: state.sound.streamUrl,
@@ -109,6 +122,7 @@ class MeditationController extends StateNotifier<MeditationSettings> {
 
   Future<void> resumeMeditation() async {
     if (state.remainingSeconds <= 0) return;
+    _cancelTimer();
     await _audioService.play();
     await _audioService.setVolume(state.volume);
     state = state.copyWith(isPlaying: true);
@@ -140,10 +154,10 @@ class MeditationController extends StateNotifier<MeditationSettings> {
 
     if (playBell) {
       nextState = _updateProgressAfterCompletedSession(nextState);
-      await _repository.save(nextState);
     }
 
     state = nextState;
+    await _repository.save(state);
   }
 
   Future<void> setVolume(double value) async {
@@ -154,6 +168,10 @@ class MeditationController extends StateNotifier<MeditationSettings> {
   }
 
   Future<void> applyPreset(String presetId) async {
+    await _audioService.stop();
+    _cancelTimer();
+    _cancelHeartRateTimer();
+
     if (presetId == 'sleep') {
       state = state.copyWith(
         durationMinutes: 30,
@@ -193,6 +211,7 @@ class MeditationController extends StateNotifier<MeditationSettings> {
         clearCurrentHeartRate: true,
         breathingPaceLabel: '4-4',
       );
+      await _repository.save(state);
     } else if (state.isPlaying) {
       await _startHeartRateSyncIfEnabled();
     }
@@ -225,6 +244,7 @@ class MeditationController extends StateNotifier<MeditationSettings> {
       currentHeartRate: bpm,
       breathingPaceLabel: _heartRateService.breathingPaceForHeartRate(bpm),
     );
+    await _repository.save(state);
   }
 
   MeditationSettings _updateProgressAfterCompletedSession(
