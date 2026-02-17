@@ -10,6 +10,11 @@ class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   static const _durations = [5, 10, 15, 30];
+  static const _presets = <({String id, String title, IconData icon})>[
+    (id: 'sleep', title: 'Сон', icon: Icons.nightlight_round),
+    (id: 'focus', title: 'Фокус', icon: Icons.psychology_alt),
+    (id: 'antiStress', title: 'Антистресс', icon: Icons.self_improvement),
+  ];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -34,6 +39,48 @@ class HomeScreen extends ConsumerWidget {
             if (state.isBreathingAnimationEnabled) const BreathingAnimation(),
             const SizedBox(height: 16),
             TimerCard(remainingSeconds: state.remainingSeconds),
+            const SizedBox(height: 16),
+            Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _Metric(
+                      label: 'Сессии',
+                      value: '${state.totalSessions}',
+                    ),
+                    _Metric(
+                      label: 'Минуты',
+                      value: '${state.totalMeditationMinutes}',
+                    ),
+                    _Metric(
+                      label: 'Streak',
+                      value: '${state.currentStreak} дн.',
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text('Смарт-пресеты', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _presets
+                  .map(
+                    (preset) => ActionChip(
+                      avatar: Icon(preset.icon, size: 18),
+                      label: Text(preset.title),
+                      onPressed: () => controller.applyPreset(preset.id),
+                    ),
+                  )
+                  .toList(),
+            ),
             const SizedBox(height: 16),
             Text('Длительность', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
@@ -62,6 +109,18 @@ class HomeScreen extends ConsumerWidget {
                     controller.setSound(value);
                   }
                 },
+              ),
+            ),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Громкость'),
+              subtitle: Slider(
+                value: state.volume,
+                min: 0,
+                max: 1,
+                divisions: 10,
+                label: '${(state.volume * 100).round()}%',
+                onChanged: controller.setVolume,
               ),
             ),
             SwitchListTile(
@@ -93,6 +152,29 @@ class HomeScreen extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _Metric extends StatelessWidget {
+  const _Metric({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+        const SizedBox(height: 4),
+        Text(label, style: Theme.of(context).textTheme.bodySmall),
+      ],
     );
   }
 }

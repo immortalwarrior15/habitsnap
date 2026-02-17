@@ -76,6 +76,7 @@ class MeditationController extends StateNotifier<MeditationSettings> {
       streamUrl: state.sound.streamUrl,
     );
     await _audioService.play();
+    await _audioService.setVolume(state.volume);
 
     state = state.copyWith(isPlaying: true);
 
@@ -97,6 +98,7 @@ class MeditationController extends StateNotifier<MeditationSettings> {
   Future<void> resumeMeditation() async {
     if (state.remainingSeconds <= 0) return;
     await _audioService.play();
+    await _audioService.setVolume(state.volume);
     state = state.copyWith(isPlaying: true);
 
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) async {
@@ -117,9 +119,77 @@ class MeditationController extends StateNotifier<MeditationSettings> {
       await _audioService.stop();
     }
 
-    state = state.copyWith(
+    var nextState = state.copyWith(
       isPlaying: false,
       remainingSeconds: state.durationMinutes * 60,
+    );
+
+    if (playBell) {
+      nextState = _updateProgressAfterCompletedSession(nextState);
+      await _repository.save(nextState);
+    }
+
+    state = nextState;
+  }
+
+  Future<void> setVolume(double value) async {
+    final normalized = value.clamp(0.0, 1.0);
+    state = state.copyWith(volume: normalized);
+    await _audioService.setVolume(normalized);
+    await _repository.save(state);
+  }
+
+  Future<void> applyPreset(String presetId) async {
+    if (presetId == 'sleep') {
+      state = state.copyWith(
+        durationMinutes: 30,
+        sound: MeditationSound.ocean,
+        isBreathingAnimationEnabled: true,
+        remainingSeconds: 30 * 60,
+      );
+    } else if (presetId == 'focus') {
+      state = state.copyWith(
+        durationMinutes: 15,
+        sound: MeditationSound.forest,
+        isBreathingAnimationEnabled: false,
+        remainingSeconds: 15 * 60,
+      );
+    } else if (presetId == 'antiStress') {
+      state = state.copyWith(
+        durationMinutes: 10,
+        sound: MeditationSound.rain,
+        isBreathingAnimationEnabled: true,
+        remainingSeconds: 10 * 60,
+      );
+    } else {
+      return;
+    }
+
+    await _repository.save(state);
+  }
+
+  MeditationSettings _updateProgressAfterCompletedSession(
+    MeditationSettings settings,
+  ) {
+    final now = DateTime.now();
+    final dayIndex = DateTime(now.year, now.month, now.day)
+            .millisecondsSinceEpoch ~/
+        Duration.millisecondsPerDay;
+
+    final lastDay = settings.lastCompletedDay;
+    final streak = switch (lastDay) {
+      null => 1,
+      final d when d == dayIndex => settings.currentStreak,
+      final d when d == dayIndex - 1 => settings.currentStreak + 1,
+      _ => 1,
+    };
+
+    return settings.copyWith(
+      totalSessions: settings.totalSessions + 1,
+      totalMeditationMinutes:
+          settings.totalMeditationMinutes + settings.durationMinutes,
+      currentStreak: streak,
+      lastCompletedDay: dayIndex,
     );
   }
 

@@ -39,6 +39,11 @@ class MeditationSettings {
     required this.isBreathingAnimationEnabled,
     required this.isPlaying,
     required this.remainingSeconds,
+    required this.volume,
+    required this.totalSessions,
+    required this.totalMeditationMinutes,
+    required this.currentStreak,
+    required this.lastCompletedDay,
   });
 
   final int durationMinutes;
@@ -47,6 +52,13 @@ class MeditationSettings {
   final bool isBreathingAnimationEnabled;
   final bool isPlaying;
   final int remainingSeconds;
+  final double volume;
+
+  // Прогресс пользователя (рост удержания).
+  final int totalSessions;
+  final int totalMeditationMinutes;
+  final int currentStreak;
+  final int? lastCompletedDay;
 
   factory MeditationSettings.initial() {
     return const MeditationSettings(
@@ -56,6 +68,11 @@ class MeditationSettings {
       isBreathingAnimationEnabled: true,
       isPlaying: false,
       remainingSeconds: 10 * 60,
+      volume: 0.8,
+      totalSessions: 0,
+      totalMeditationMinutes: 0,
+      currentStreak: 0,
+      lastCompletedDay: null,
     );
   }
 
@@ -66,6 +83,11 @@ class MeditationSettings {
     bool? isBreathingAnimationEnabled,
     bool? isPlaying,
     int? remainingSeconds,
+    double? volume,
+    int? totalSessions,
+    int? totalMeditationMinutes,
+    int? currentStreak,
+    int? lastCompletedDay,
   }) {
     return MeditationSettings(
       durationMinutes: durationMinutes ?? this.durationMinutes,
@@ -75,6 +97,12 @@ class MeditationSettings {
           isBreathingAnimationEnabled ?? this.isBreathingAnimationEnabled,
       isPlaying: isPlaying ?? this.isPlaying,
       remainingSeconds: remainingSeconds ?? this.remainingSeconds,
+      volume: volume ?? this.volume,
+      totalSessions: totalSessions ?? this.totalSessions,
+      totalMeditationMinutes:
+          totalMeditationMinutes ?? this.totalMeditationMinutes,
+      currentStreak: currentStreak ?? this.currentStreak,
+      lastCompletedDay: lastCompletedDay ?? this.lastCompletedDay,
     );
   }
 }

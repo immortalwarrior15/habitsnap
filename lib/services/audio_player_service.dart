@@ -29,6 +29,8 @@ class AudioPlayerService {
     }
   }
 
+  Future<void> setVolume(double value) => _player.setVolume(value);
+
   Future<void> pause() => _player.pause();
 
   Future<void> stop() async {
