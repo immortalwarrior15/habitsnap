@@ -1,0 +1,30 @@
+name: habitsnap_meditation
+version: 1.0.0+1
+publish_to: "none"
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.5.1
+  just_audio: ^0.9.39
+  just_audio_background: ^0.0.1-beta.13
+  shared_preferences: ^2.2.3
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.2
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/audio/rain.mp3
+    - assets/audio/forest.mp3
+    - assets/audio/ocean.mp3
+    - assets/audio/white_noise.mp3
+    - assets/audio/meditation_music.mp3
+    - assets/audio/bell.mp3
