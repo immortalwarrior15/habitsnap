@@ -193,6 +193,13 @@ class MeditationController extends StateNotifier<MeditationSettings> {
         isBreathingAnimationEnabled: true,
         remainingSeconds: 10 * 60,
       );
+    } else if (presetId == 'castanedaEnergy') {
+      state = state.copyWith(
+        durationMinutes: 15,
+        sound: MeditationSound.music,
+        isBreathingAnimationEnabled: true,
+        remainingSeconds: 15 * 60,
+      );
     } else {
       return;
     }
@@ -250,8 +257,16 @@ class MeditationController extends StateNotifier<MeditationSettings> {
       currentHeartRate: bpm,
       breathingPaceLabel: _heartRateService.breathingPaceForHeartRate(bpm),
       lastHeartRateSyncAt: DateTime.now(),
+      castanedaEnergyLevel: _castanedaEnergyFromBpm(bpm),
     );
     await _repository.save(state);
+  }
+
+  int _castanedaEnergyFromBpm(int bpm) {
+    // Условная «энергия» по мотивам практик осознанности Кастанеды:
+    // чем стабильнее и ниже пульс в медитативном диапазоне, тем выше уровень.
+    final score = 100 - (bpm - 60).abs() * 2;
+    return score.clamp(0, 100).toInt();
   }
 
   // Ручная проверка канала пульса для QA/диагностики.

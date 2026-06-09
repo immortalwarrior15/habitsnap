@@ -49,6 +49,7 @@ class MeditationSettings {
     required this.breathingPaceLabel,
     required this.isHeartRatePermissionGranted,
     required this.lastHeartRateSyncAt,
+    required this.castanedaEnergyLevel,
   });
 
   final int durationMinutes;
@@ -69,6 +70,7 @@ class MeditationSettings {
   final String breathingPaceLabel;
   final bool isHeartRatePermissionGranted;
   final DateTime? lastHeartRateSyncAt;
+  final int castanedaEnergyLevel;
 
   factory MeditationSettings.initial() {
     return const MeditationSettings(
@@ -88,6 +90,7 @@ class MeditationSettings {
       breathingPaceLabel: '4-4',
       isHeartRatePermissionGranted: false,
       lastHeartRateSyncAt: null,
+      castanedaEnergyLevel: 50,
     );
   }
 
@@ -110,6 +113,7 @@ class MeditationSettings {
     bool? isHeartRatePermissionGranted,
     DateTime? lastHeartRateSyncAt,
     bool clearLastHeartRateSyncAt = false,
+    int? castanedaEnergyLevel,
   }) {
     return MeditationSettings(
       durationMinutes: durationMinutes ?? this.durationMinutes,
@@ -134,6 +138,7 @@ class MeditationSettings {
       lastHeartRateSyncAt: clearLastHeartRateSyncAt
           ? null
           : (lastHeartRateSyncAt ?? this.lastHeartRateSyncAt),
+      castanedaEnergyLevel: castanedaEnergyLevel ?? this.castanedaEnergyLevel,
     );
   }
 }

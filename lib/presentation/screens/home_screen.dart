@@ -14,6 +14,7 @@ class HomeScreen extends ConsumerWidget {
     (id: 'sleep', title: 'Сон', icon: Icons.nightlight_round),
     (id: 'focus', title: 'Фокус', icon: Icons.psychology_alt),
     (id: 'antiStress', title: 'Антистресс', icon: Icons.self_improvement),
+    (id: 'castanedaEnergy', title: 'Энергия', icon: Icons.bolt),
   ];
 
   @override
@@ -87,6 +88,9 @@ class HomeScreen extends ConsumerWidget {
                       'Пульс: ${state.currentHeartRate?.toString() ?? '—'} BPM',
                     ),
                     Text('Ритм дыхания: ${state.breathingPaceLabel}'),
+                    Text(
+                      'Энергия (по Кастанеде): ${state.castanedaEnergyLevel}%',
+                    ),
                     const SizedBox(height: 4),
                     Text(
                       state.isHeartRatePermissionGranted

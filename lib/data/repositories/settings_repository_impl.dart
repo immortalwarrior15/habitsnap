@@ -43,6 +43,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
       breathingPaceLabel: '4-4',
       isHeartRatePermissionGranted: prefs.getBool(_heartPermissionKey) ?? false,
       lastHeartRateSyncAt: null,
+      castanedaEnergyLevel: 50,
     );
   }
 
